@@ -18,7 +18,7 @@ describe('API Tests', () => {
                 expect(res.body).to.be.an('array');
                 done();
             });
-    }).timeout(100000);
+    }).timeout(10000);
 
     it('Debe manejar errores correctamente al fallar una petición', (done) => {
         chai.request(app)
@@ -27,5 +27,5 @@ describe('API Tests', () => {
                 expect(res).to.have.status(500);
                 done();
             });
-    }).timeout(100000);
+    }).timeout(10000);
 });

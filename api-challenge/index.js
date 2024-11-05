@@ -26,8 +26,7 @@ app.get('/files/data', async (req, res) => {
                 const lines = await processFile(fileName, fileContent);
                 return res.json([{ file: fileName, lines }]);
             } catch (error) {
-                // console.error(`error al procesar el archivo ${fileName}:`, error);
-                return res.status(500).send(`error al procesar el archivo ${fileName}`);
+                return res.status(500).send('Error al procesar la solicitud');
             }
         }
         const response = await apiClient.get('/files');
@@ -44,16 +43,32 @@ app.get('/files/data', async (req, res) => {
                     results.push({ file, lines });
                 }
             } catch (error) {
-                // console.error(`error al procesar el archivo ${file}:`, error);
+                // console.error(`error al procesar el archivo ${file}:`:`, error.message);
             }
         }
 
         res.json(results);
     } catch (error) {
-        // console.error(error);
-        res.status(500).send('Error al get de la lista de archivos');
+        console.error('error en el endpoint /files/data:', error.message);
+        res.status(500).send('Error al procesar la solicitud');
     }
 });
+
+
+app.get('/files/list', async (req, res) => {
+    try {
+        const { fileName } = req.query;
+        const response = await apiClient.get('/files');
+        const files = response.data.files;
+        if (fileName) {
+            files = files.filter(file => file.includes(fileName));
+        }
+        res.json(files);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error al obtener la lista de archivos');
+    }
+})
 
 
 module.exports = app;
