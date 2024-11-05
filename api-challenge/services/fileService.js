@@ -1,6 +1,12 @@
-
 const csv = require('csv-parser');
 const { Readable } = require('stream');
+
+const isValidLine = (data) => {
+    const allFields = data.file && data.text && data.number && data.hex;
+    const isNumberValid = !isNaN(Number(data.number));
+    const isHexValid = /^[a-fA-F0-9]{32}$/.test(data.hex);
+    return allFields && isNumberValid && isHexValid;
+};
 
 const processFile = async (fileName, fileContent) => {
     const lines = [];
@@ -11,7 +17,7 @@ const processFile = async (fileName, fileContent) => {
         stream
             .pipe(csv())
             .on('data', (data) => {
-                if (data.file && data.text && data.number && data.hex) {
+                if (isValidLine(data)) {
                     lines.push({
                         text: data.text,
                         number: Number(data.number),
