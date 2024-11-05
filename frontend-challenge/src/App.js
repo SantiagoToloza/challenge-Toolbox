@@ -1,15 +1,29 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
-import { Container, Navbar, Table } from 'react-bootstrap';
+import { Container, Navbar, Spinner, Table } from 'react-bootstrap';
+import axios from 'axios';
 
 
 
-const data = [
-  { fileName: 'file1.csv', text: 'RgTya', number: '64075909', hex: '70ad29aacf0b690b0467fe2b2767f765' },
-  { fileName: 'file1.csv', text: 'RgTya', number: '64075909', hex: '70ad29aacf0b690b0467fe2b2767f765' },
-]
+
+
 
 function App() {
+  const [data, setData] = useState([]);
+
+  console.log(data)
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    axios.get('http://localhost:3000/files/data')
+      .then((response) => {
+        setData(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('error al obtener los datos:', error);
+        setLoading(false)
+      });
+  }, []);
   return (
     <div className="App">
       <>
@@ -18,6 +32,7 @@ function App() {
         </Navbar>
         <Container className="mt-4">
           <h1>Files</h1>
+          {loading && <Spinner />}
           <Table striped bordered hover>
             <thead>
               <tr>
@@ -28,13 +43,15 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {data.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.fileName}</td>
-                  <td>{item.text}</td>
-                  <td>{item.number}</td>
-                  <td>{item.hex}</td>
-                </tr>
+              {data?.map((file) => (
+                file.lines.map((line, index) => (
+                  <tr key={`${file.file}-${index}`}>
+                    <td>{file.file}</td>
+                    <td>{line.text}</td>
+                    <td>{line.number}</td>
+                    <td>{line.hex}</td>
+                  </tr>
+                ))
               ))}
             </tbody>
           </Table>

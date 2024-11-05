@@ -1,8 +1,16 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
 const port = 3000;
 const apiClient = require('./services/apiServices.js');
 const { processFile } = require('./services/fileService');
+
+
+app.use(cors({
+    origin: 'http://localhost:3001'
+}));
+
+
 
 app.listen(port, () => {
     console.log(`API listening at http://localhost:${port}`);
