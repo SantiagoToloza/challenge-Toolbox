@@ -1,34 +1,43 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { Container, Navbar, Spinner, Table, Form, Button } from 'react-bootstrap'
+import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios'
 
 function App() {
-  const [data, setData] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [fileName, setFileName] = useState('')
+  const dispatch = useDispatch();
+  const data = useSelector((state) => state.data);
+  const loading = useSelector((state) => state.loading);
+  const fileName = useSelector((state) => state.fileName);
 
   useEffect(() => {
-    fetchData()
-  }, [fileName])
+    fetchData();
+  }, [fileName]);
 
-  const fetchData = (fileName = '') => {
-    setLoading(true)
-    const url = fileName ? `http://localhost:3000/files/list?fileName=${fileName}` : 'http://localhost:3000/files/data'
+  const fetchData = () => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    const url = fileName
+      ? `http://localhost:3000/files/data?fileName=${fileName}`
+      : 'http://localhost:3000/files/data';
+
     axios.get(url)
       .then((response) => {
-        setData(response.data)
-        setLoading(false)
+        dispatch({ type: 'SET_DATA', payload: response.data });
+        dispatch({ type: 'SET_LOADING', payload: false });
       })
       .catch((error) => {
-        console.error('error al obtener los datos:', error)
-        setLoading(false)
-      })
-  }
+        console.error('Error al obtener los datos:', error);
+        dispatch({ type: 'SET_LOADING', payload: false });
+      });
+  };
 
   const handleFilter = (e) => {
-    e.preventDefault()
-    fetchData(fileName)
-  }
+    e.preventDefault();
+    fetchData();
+  };
+
+  const handleFileNameChange = (e) => {
+    dispatch({ type: 'SET_FILE_NAME', payload: e.target.value });
+  };
 
   return (
     <div className='App'>
@@ -44,7 +53,7 @@ function App() {
               <Form.Control
                 type='text'
                 value={fileName}
-                onChange={(e) => setFileName(e.target.value)}
+                onChange={handleFileNameChange}
                 placeholder='Enter file name'
               />
             </Form.Group>
@@ -60,28 +69,31 @@ function App() {
                 <th>Hex</th>
               </tr>
             </thead>
-            {data?.map((file, fileIndex) => (
-              file.lines && file.lines.length > 0 ? (
-                file.lines.map((line, index) => (
-                  <tr key={`${file.file}-${index}`}>
+            <tbody>
+              {data?.map((file, fileIndex) => (
+                file.lines && file.lines.length > 0 ? (
+                  file.lines.map((line, index) => (
+                    <tr key={`${file.file}-${index}`}>
+                      <td>{file.file}</td>
+                      <td>{line.text}</td>
+                      <td>{line.number}</td>
+                      <td>{line.hex}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr key={`no-details-${fileIndex}`}>
                     <td>{file.file}</td>
-                    <td>{line.text}</td>
-                    <td>{line.number}</td>
-                    <td>{line.hex}</td>
+                    <td colSpan="3">No details available</td>
                   </tr>
-                ))
-              ) : (
-                <tr key={`no-details-${fileIndex}`}>
-                  <td>{file}</td>
-                  {/* <td colSpan="3">No details available</td> */}
-                </tr>
-              )
-            ))}
+                )
+              ))}
+            </tbody>
           </Table>
         </Container>
       </>
     </div>
-  )
+  );
 }
+
 
 export default App
