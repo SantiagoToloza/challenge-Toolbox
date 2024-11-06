@@ -59,7 +59,7 @@ app.get('/files/list', async (req, res) => {
     try {
         const { fileName } = req.query;
         const response = await apiClient.get('/files');
-        const files = response.data.files;
+        let files = response.data.files;
         if (fileName) {
             files = files.filter(file => file.includes(fileName));
         }

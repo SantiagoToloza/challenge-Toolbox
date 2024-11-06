@@ -1,37 +1,55 @@
-import React from 'react';
-import { useEffect, useState } from 'react';
-import { Container, Navbar, Spinner, Table } from 'react-bootstrap';
-import axios from 'axios';
-
-
-
-
-
+import React, { useEffect, useState } from 'react'
+import { Container, Navbar, Spinner, Table, Form, Button } from 'react-bootstrap'
+import axios from 'axios'
 
 function App() {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [fileName, setFileName] = useState('')
 
-  console.log(data)
-  const [loading, setLoading] = useState(true);
   useEffect(() => {
-    axios.get('http://localhost:3000/files/data')
+    fetchData()
+  }, [fileName])
+
+  const fetchData = (fileName = '') => {
+    setLoading(true)
+    const url = fileName ? `http://localhost:3000/files/list?fileName=${fileName}` : 'http://localhost:3000/files/data'
+    axios.get(url)
       .then((response) => {
-        setData(response.data);
-        setLoading(false);
+        setData(response.data)
+        setLoading(false)
       })
       .catch((error) => {
-        console.error('error al obtener los datos:', error);
+        console.error('error al obtener los datos:', error)
         setLoading(false)
-      });
-  }, []);
+      })
+  }
+
+  const handleFilter = (e) => {
+    e.preventDefault()
+    fetchData(fileName)
+  }
+
   return (
-    <div className="App">
+    <div className='App'>
       <>
-        <Navbar bg="danger" variant="dark" className='mb-3'>
-          <Navbar.Brand href="#home">React Test App</Navbar.Brand>
+        <Navbar bg='danger' variant='dark' className='mb-3'>
+          <Navbar.Brand href='#home'>React Test App</Navbar.Brand>
         </Navbar>
-        <Container className="mt-4">
+        <Container className='mt-4'>
           <h1>Files</h1>
+          <Form onSubmit={handleFilter} className='mb-3'>
+            <Form.Group>
+              <Form.Label>Filter by File Name</Form.Label>
+              <Form.Control
+                type='text'
+                value={fileName}
+                onChange={(e) => setFileName(e.target.value)}
+                placeholder='Enter file name'
+              />
+            </Form.Group>
+            <Button variant='primary' type='submit' className='mt-2'>Filter</Button>
+          </Form>
           {loading && <Spinner />}
           <Table striped bordered hover>
             <thead>
@@ -42,8 +60,8 @@ function App() {
                 <th>Hex</th>
               </tr>
             </thead>
-            <tbody>
-              {data?.map((file) => (
+            {data?.map((file, fileIndex) => (
+              file.lines && file.lines.length > 0 ? (
                 file.lines.map((line, index) => (
                   <tr key={`${file.file}-${index}`}>
                     <td>{file.file}</td>
@@ -52,13 +70,18 @@ function App() {
                     <td>{line.hex}</td>
                   </tr>
                 ))
-              ))}
-            </tbody>
+              ) : (
+                <tr key={`no-details-${fileIndex}`}>
+                  <td>{file}</td>
+                  {/* <td colSpan="3">No details available</td> */}
+                </tr>
+              )
+            ))}
           </Table>
         </Container>
       </>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
