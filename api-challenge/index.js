@@ -13,7 +13,7 @@ app.use(cors({
 
 
 app.listen(port, () => {
-    console.log(`API listening at http://localhost:${port}`);
+    console.log(`API listening at http://localhost:${port} & front end at http://localhost:3001`);
 });
 
 app.get('/files/data', async (req, res) => {
