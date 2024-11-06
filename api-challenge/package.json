@@ -8,17 +8,22 @@
   },
   "scripts": {
     "start": "node index.js",
-    "test": "mocha"
+    "test": "mocha",
+    "dev": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "axios": "^1.7.7",
+    "cors": "^2.8.5",
+    "csv-parser": "^3.0.0",
     "express": "^4.21.1"
   },
   "devDependencies": {
-    "chai": "^5.1.2",
-    "mocha": "^10.8.2"
+    "chai": "^4.5.0",
+    "chai-http": "^4.4.0",
+    "mocha": "^8.4.0",
+    "nodemon": "^3.1.7"
   }
 }
