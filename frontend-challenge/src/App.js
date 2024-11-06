@@ -1,25 +1,31 @@
-import React, { useEffect } from 'react'
-import { Container, Navbar, Spinner, Table, Form, Button } from 'react-bootstrap'
+import React, { useEffect } from 'react';
+import { Container, Navbar, Spinner, Table, Form, Button } from 'react-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
-import axios from 'axios'
+import { useSearchParams } from 'react-router-dom';
+import axios from 'axios';
 
 function App() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const fileNameParam = searchParams.get('fileName');
   const dispatch = useDispatch();
+
   const data = useSelector((state) => state.data);
   const loading = useSelector((state) => state.loading);
   const fileName = useSelector((state) => state.fileName);
 
   useEffect(() => {
     fetchData();
-  }, [fileName]);
+  }, [fileNameParam]);
 
   const fetchData = () => {
     dispatch({ type: 'SET_LOADING', payload: true });
-    const url = fileName
-      ? `http://localhost:3000/files/data?fileName=${fileName}`
-      : 'http://localhost:3000/files/data';
+    console.log(fileNameParam)
+    const url = fileNameParam === null || fileNameParam === ''
+      ? `http://localhost:3000/files/data`
+      : `http://localhost:3000/files/list?fileName=${fileNameParam}`
 
-    axios.get(url)
+    axios
+      .get(url)
       .then((response) => {
         dispatch({ type: 'SET_DATA', payload: response.data });
         dispatch({ type: 'SET_LOADING', payload: false });
@@ -32,7 +38,7 @@ function App() {
 
   const handleFilter = (e) => {
     e.preventDefault();
-    fetchData();
+    setSearchParams({ fileName });
   };
 
   const handleFileNameChange = (e) => {
@@ -57,7 +63,9 @@ function App() {
                 placeholder='Enter file name'
               />
             </Form.Group>
-            <Button variant='primary' type='submit' className='mt-2'>Filter</Button>
+            <Button variant='primary' type='submit' className='mt-2'>
+              Filter
+            </Button>
           </Form>
           {loading && <Spinner />}
           <Table striped bordered hover>
@@ -70,23 +78,23 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {data?.map((file, fileIndex) => (
+              {data?.map((file, fileIndex) =>
                 file.lines && file.lines.length > 0 ? (
                   file.lines.map((line, index) => (
                     <tr key={`${file.file}-${index}`}>
                       <td>{file.file}</td>
                       <td>{line.text}</td>
-                      <td>{line.number}</td>
+                      <td data-testid="file-number-0">{line.number}</td>
                       <td>{line.hex}</td>
                     </tr>
                   ))
                 ) : (
                   <tr key={`no-details-${fileIndex}`}>
-                    <td>{file.file}</td>
+                    <td>{file}</td>
                     <td colSpan="3">No details available</td>
                   </tr>
                 )
-              ))}
+              )}
             </tbody>
           </Table>
         </Container>
@@ -95,5 +103,4 @@ function App() {
   );
 }
 
-
-export default App
+export default App;
